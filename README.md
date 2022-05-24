@@ -8,3 +8,6 @@ projects that are ambiguous to call a Project
 
 ### 라이센스 정보 스크래핑 (License Info Scraping)
 [오픈 소스 라이센스 비교표](https://olis.or.kr/license/compareGuide.do)의 정보를 `read_html`을 이용해 수집해본 프로젝트
+
+### 교통사고 데이터 분석 (Traffic Accident Data Analysis)
+[공공 데이터 포털]()에서 제공하는 교통사고 관련 데이터를 이용해, 데이터 시각화와 통계값 등을 해본 프로젝트
