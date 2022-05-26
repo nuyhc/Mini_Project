@@ -20,8 +20,9 @@ projects that are ambiguous to call a Project
 
 ### 3. 교통사고 데이터 분석 (Traffic Accident Data Analysis)
 [공공 데이터 포털]()에서 제공하는 교통사고 관련 데이터를 이용해,  
-데이터 시각화와 통계값 등을 구해본 프로젝트
+데이터 시각화와 통계값 등을 구해본 프로젝트  
+-> 데이터 선택을 잘못해 제대로하지 못한 프로젝트
 
-<img src="https://img.shields.io/badge/Python-3776AB?style=plastic&logo=python&logoColor=FFFFFF&"/> <img src="https://img.shields.io/badge/Pandas-150458?style=plastic&logo=pandas&logoColor=FFFFFF&"/> <img src="https://img.shields.io/badge/Seaborn-007ACC?style=plastic&logo=seaborn&logoColor=8CAAE6&"/> <img src="https://img.shields.io/badge/VS Code-007ACC?style=plastic&logo=visualstudiocode&logoColor=FFFFFF&"/>  
+<img src="https://img.shields.io/badge/Python-3776AB?style=plastic&logo=python&logoColor=FFFFFF&"/> <img src="https://img.shields.io/badge/Pandas-150458?style=plastic&logo=pandas&logoColor=FFFFFF&"/> <img src="https://img.shields.io/badge/Plotly-3F4F75?style=plastic&logo=plotly&logoColor=FFFFFF&"/> <img src="https://img.shields.io/badge/VS Code-007ACC?style=plastic&logo=visualstudiocode&logoColor=FFFFFF&"/>  
   
 ---
