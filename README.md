@@ -22,6 +22,8 @@ projects that are ambiguous to call a Project
 팀원들과 데이터를 합치고, 피드백을 일부분 받아 개선한 프로젝트  
 내용은 거의 비슷하나, 팀원들의 데이터와 분석도 포함되어 있음
 
+---
+
 ### 4. 탄소중립을 위한 기후기술 정보 시각화 (V_CTI_CN)
 Visualization_of Climate Technology Information_for Carbon Neutrality  
 [KOSIS 국가통계 포털](https://kosis.kr/index/index.do) 데이터를 이용해 EDA를 진행한 프로젝트  
