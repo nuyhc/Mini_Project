@@ -41,3 +41,9 @@ Visualization_of Climate Technology Information_for Carbon Neutrality
 [KOSIS 암 검진 데이터](https://kosis.kr/statHtml/statHtml.do?orgId=350&tblId=DT_35007_N010&conn_path=I2)를 분석하고 시각화해본 프로젝트
 
 ---
+
+### 7. 의약품 처방 정보 분석 (Medication Prescription Information EDA)
+[공공 데이터 포털](https://www.data.go.kr/data/15007117/fileData.do)의 의약품 처방 데이터를 분석하고 시각화해본 프로젝트
+대용량 데이터를 다뤄봄
+
+---
