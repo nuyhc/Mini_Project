@@ -37,3 +37,7 @@ Visualization_of Climate Technology Information_for Carbon Neutrality
 
 ---
 
+### 6. 암 검진 데이터 분석 (Cancer EDA)
+[KOSIS 암 검진 데이터]()를 분석하고 시각화해본 프로젝트
+
+---
