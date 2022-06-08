@@ -27,7 +27,6 @@ projects that are ambiguous to call a Project
 ### 4. 탄소중립을 위한 기후기술 정보 시각화 (V_CTI_CN)
 Visualization_of Climate Technology Information_for Carbon Neutrality  
 [KOSIS 국가통계 포털](https://kosis.kr/index/index.do) 데이터를 이용해 EDA를 진행한 프로젝트  
-[데이콘 탄소중립을 위한 기후기술 정보 시각화 경진대회](https://dacon.io/competitions/official/235911/overview/description) 참가 프로젝트
 
 ---
 
