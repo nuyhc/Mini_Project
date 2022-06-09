@@ -46,3 +46,8 @@ Visualization_of Climate Technology Information_for Carbon Neutrality
 대용량 데이터를 다뤄봄
 
 ---
+
+### 8. 주요 질병 사망자 및 보건 환경 비교 분석 (CAoMDDaHE)
+Comparative Analysis of Major Disease Deaths and Health Environment  
+
+---
