@@ -49,5 +49,11 @@ Visualization_of Climate Technology Information_for Carbon Neutrality
 
 ### 8. 주요 질병 사망자 및 보건 환경 비교 분석 (CAoMDDaHE)
 Comparative Analysis of Major Disease Deaths and Health Environment  
+멋쟁이 사자처럼 AI School 6기 Mid Project  
+1. 주요 사망 원인별 사망률 - 김태훈, 김채현
+2. 의료종사자 수 - 김채현
+3. 보건 관련 서비스 지출비 - 김재석
+4. 의약품 판매 소비 - 손유선
+5. 공공사회 복지 지출 - 박이슬
 
 ---
