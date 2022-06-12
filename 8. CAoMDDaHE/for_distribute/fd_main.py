@@ -9,6 +9,7 @@ import folium
 from folium.plugins import MarkerCluster
 import json
 import streamlit as st
+from streamlit_folium import st_folium
 
 ## Title
 st.title("질병 사망자 및 보건 환경 비교 분석")
@@ -70,6 +71,13 @@ df_service = pd.read_csv("../data/pre_df/df_service.csv")
 df_service_common = pd.read_csv("../data/pre_df/df_service_common.csv")
 df_medicion = pd.read_csv("../data/pre_df/df_medicion.csv")
 df_welfare = pd.read_csv("../data/pre_df/df_welfare.csv")
+## json
+g_p = open("../data/countries.geo.edited.json")
+gp = open("../data/countries.json")
+geo_poly = json.load(g_p)
+geo_point = pd.json_normalize(json.load(gp))
+g_p.close()
+gp.close()
 
 ## 데이터 분석 범위 설정
 st.markdown("## 데이터 분석 범위 설정")
@@ -84,7 +92,7 @@ st.markdown("본 프로젝트는 \"질병에 따른 사망률\"과\"다양한 �
 
 with st.echo():
     # 교집합 이용
-    country_intersecion = set(df_1) & set(df_2) & set(df_3) & set(df_4)
+    # country_intersecion = set(df_1) & set(df_2) & set(df_3) & set(df_4) ..
     # 최종 리스트 선정
     country_intersection = ['룩셈부르크',  '네덜란드',  '영국',  '이탈리아',  
         '캐나다',  '오스트레일리아',  '한국',  '일본',  '스페인',  '헝가리',  '독일',  
@@ -92,11 +100,86 @@ with st.echo():
         '슬로베니아',  '프랑스',  '스웨덴',  '노르웨이',  '뉴질랜드',  '라트비아',  
         '덴마크',  '오스트리아',  '포르투갈',  '아일랜드',  '아이슬란드']
 
+## 국가 영문명 추가
+st.markdown("## 영문 국가명 추가")
+st.markdown("데이터를 전처리하는 과정에서 영문 국가명을 추가해줬습니다.\n"
+            "Google Trans API를 이용했습니다\n")
+with st.echo():
+    from googletrans import Translator
+    import time
+    translator = Translator()
+    
+    def kor2eng(list_of_country):
+        temp = []
+        for _ in list_of_country:
+            temp.append(translator.translate(_).text.lower())
+            time.sleep(0.5)
+        return temp
+
+    dict_kor2eng = {}
+    list_kor2eng = kor2eng(df_Nmw["국가"].unique())
+
+    for kor, eng in zip(df_Nmw["국가"].unique(), list_kor2eng):
+        dict_kor2eng[kor] = eng
+
 ## part 1
 st.markdown("## 1. 주요 사망 원인별 사망률")
 st.markdown("### Data set")
 st.dataframe(df_death_rate) # st.table도 사용 가능 -> 일부만 표시시
 ## 연도별 평균 사망률
+st.markdown("#### 연도별 평균 사망률")
+with st.echo():
+    fig = plt.figure(figsize=(14, 6))
+    sns.pointplot(data=df_death_rate, x="연도", y="사망률", hue="국가", estimator=np.mean, ci=None).set_title("연도별 사망률 (연간 평균 사망률)")
+    st.pyplot(fig)
+## 질병에 따른 사망률
+st.markdown("#### 질병에 따른 사망률")
+with st.echo():
+    fig = plt.figure(figsize=(14, 6))
+    sns.pointplot(data=df_death_rate, x="연도", y="사망률", hue="질병명", estimator=np.sum, ci=None).set_title("질병에 따른 사망률")
+    st.pyplot(fig)
+## 국가별 질병 사망 비율
+st.markdown("#### 국가별 질병 사망 비율")
+with st.echo():
+    st.plotly_chart(px.bar(data_frame=df_death_rate, x="연도", y="사망률", color="질병명", facet_col="국가", facet_col_wrap=5, title="국가별 질병 사망 비율", width=1600, height=800))
+## 지역 시각화
+with st.ehco():
+    icon_color = ["red", "blue", "green", "purple", "orange", "lightred", "beige", "darkblue", "darkgreen", "cadetblue", "darkpurple", "white", "pink", "lightblue", "lightgreen", "gray", "black", "lightgray"]
+    innter_choropleth = geo_poly
+    
+    m = folium.Map(zoom_star=2, tiles="CartoDB dark_matter", dexet_retina=True)
+
+    folium.Choropleth(
+        geo_data=inter_choropleth,
+        name="choropleth",
+        key_on="feature.properties.name",
+        fill_color="yellow",
+        fill_opacity=0.15,
+        line_opacity=0.7,
+    ).add_to(m)
+
+    mark_cluster = MarkerCluster().add_to(m)
+
+    for _ in df.index:
+        row = df.loc[_]
+        
+        folium.Marker([row["위도"], row["경도"]], icon=folium.Icon(icon="glyphicon glyphicon-certificate", color={k : v for k, v in zip(df_death_rate["질병명"].unique(), icon_color)}[row["질병명"]])).add_to(mark_cluster)
+        
+        folium.Circle(
+            radius = row["사망률"],
+            location = [row["위도"], row["경도"]],
+            tooltip = str(row["연도"]) + "년도 " + row["국가"] + " " + row["질병명"] + "로 인한 사망률 " + str(row["사망률"]),
+            color = {k : v for k, v in zip(df_death_rate["질병명"].unique(), icon_color)}[row["질병명"]],
+            fill = False        
+        ).add_to(m)
+
+    folium.LayerControl().add_to(m)   
+    
+    st_folium(m)
+
+
+
+
 
 ## part2
 st.markdown("## 2. 의료 종사자 수")
