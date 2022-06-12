@@ -176,7 +176,7 @@ for _ in df_death_rate.index:
         fill = False        
     ).add_to(m)
 folium.LayerControl().add_to(m)     
-st_folium(m, width=1000)
+st_folium(m, width=1300)
 
 ## part2
 st.markdown("## 2. 의료 종사자 수")
@@ -241,7 +241,7 @@ for _ in df_Nmw.index:
         fill = False        
     ).add_to(m)
 folium.LayerControl().add_to(m)
-st_folium(m, width=1000)  
+st_folium(m, width=1300)  
 
 
 
@@ -249,6 +249,12 @@ st_folium(m, width=1000)
 st.markdown("## 3. 보건 관련 지출비")
 st.markdown("### Data set")
 st.dataframe(df_service)
+## 세계 1인당 보건지출(US$) 연도별
+st.markdown("#### 세계 1인당 보건 지출 (US$)")
+with st.echo():
+    df_service = df_service[df_service["항목"]=="1인당 보건지출(US$)"].reset_index(drop=True)
+    w_pivot = pd.pivot_table(data=df_service,index='연도', columns='국가영문', values="데이터값")
+    st.plotly_chart(px.line(w_pivot))
 
 
 
@@ -271,13 +277,13 @@ with st.echo():
 ## 국가별 의약품 판매량
 st.markdown("#### 국가별 의약품 판매량")
 with st.echo():
-    fig = plt.figure(figsize=(15, 15))
+    fig = plt.figure(figsize=(13, 13))
     sns.catplot(data=df_medicion, x='의약품판매량', y='국가', kind='bar', ci=None, color="Orange").set_xticklabels(rotation=30)
     st.pyplot(fig)
 ## 국가별 의약품 소비량
 st.markdown("#### 국가별 의약품 소비량")
 with st.echo():
-    fig = plt.figure(15, 15)
+    fig = plt.figure(13, 13)
     sns.catplot(data=df_medicion, x='의약품소비량', y='국가', kind='bar', ci=None, color="Pink")
     st.pyplot(fig)
 ## 의약품별 연간 의약품 소비량
@@ -287,11 +293,18 @@ with st.echo():
     sns.pointplot(data=df_medicion, x='연도', y='의약품소비량', hue='의약품', ci=None, estimator=np.sum)
     st.pyplot(fig)
 
+df_sale = pd.read_csv("../data/pre_df/df_sale.csv", encoding="cp949")
+df_consume = pd.read_csv("../data/pre_df/df_consume.csv", encoding="cp949")
+df_consume = df_consume.rename(columns={'시점':'연도'})
+df_consume = df_consume.rename(columns={'데이터':'의약품소비량'})
+df_sale = df_sale.rename(columns={'시점' : '연도'})
+df_sale = df_sale.rename(columns={'데이터' : '의약품판매량'})
+
 ## 연간 국가별 의약품 판매량 df_sale
 st.markdown("#### 연간 국가별 의약품 판매량")
 with st.echo():
     fig = plt.figure(figsize=(25,15))
-    sns.pointplot(data=df_medicion, x='연도', y='의약품판매량', hue='국가', ci=None)
+    sns.pointplot(data=df_sale, x='연도', y='의약품판매량', hue='국가', ci=None)
     st.pyplot(fig)
 ## 연간 국가별 의약품 소비량 df_consume
 with st.echo():
