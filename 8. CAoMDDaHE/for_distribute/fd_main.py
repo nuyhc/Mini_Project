@@ -148,6 +148,7 @@ with st.echo():
     st.plotly_chart(px.bar(data_frame=df_death_rate, x="연도", y="사망률", color="질병명", facet_col="국가", facet_col_wrap=5, title="국가별 질병 사망 비율", width=1600, height=800))
 ## 지역 시각화
 st.markdown("#### 종합 지역 시각화")
+
 icon_color = ["red", "blue", "green", "purple", "orange", "lightred", "beige", "darkblue", "darkgreen", "cadetblue", "darkpurple", "white", "pink", "lightblue", "lightgreen", "gray", "black", "lightgray"]
 innter_choropleth = geo_poly
     
@@ -165,10 +166,8 @@ folium.Choropleth(
 mark_cluster = MarkerCluster().add_to(m)
 
 for _ in df_death_rate.index:
-    row = df_death_rate.loc[_]
-    
-    folium.Marker([row["위도"], row["경도"]], icon=folium.Icon(icon="glyphicon glyphicon-certificate", color={k : v for k, v in zip(df_death_rate["질병명"].unique(), icon_color)}[row["질병명"]])).add_to(mark_cluster)
-        
+    row = df_death_rate.loc[_]  
+    folium.Marker([row["위도"], row["경도"]], icon=folium.Icon(icon="glyphicon glyphicon-certificate", color={k : v for k, v in zip(df_death_rate["질병명"].unique(), icon_color)}[row["질병명"]])).add_to(mark_cluster)       
     folium.Circle(
         radius = row["사망률"],
         location = [row["위도"], row["경도"]],
@@ -176,9 +175,7 @@ for _ in df_death_rate.index:
         color = {k : v for k, v in zip(df_death_rate["질병명"].unique(), icon_color)}[row["질병명"]],
         fill = False        
     ).add_to(m)
-
-folium.LayerControl().add_to(m)   
-    
+folium.LayerControl().add_to(m)     
 st_folium(m, width=1000)
 
 ## part2
@@ -234,10 +231,8 @@ folium.Choropleth(
 mark_cluster = MarkerCluster().add_to(m)
 
 for _ in df_Nmw.index:
-    row = df_Nmw.loc[_]
-        
-    folium.Marker([row["위도"], row["경도"]], icon=folium.Icon(icon="glyphicon glyphicon-plus",color={"의사":"red", "간호사":"lightgray", "약사":"blue", "치과의사":"purple"}[row["직업"]])).add_to(mark_cluster)
-        
+    row = df_Nmw.loc[_]    
+    folium.Marker([row["위도"], row["경도"]], icon=folium.Icon(icon="glyphicon glyphicon-plus",color={"의사":"red", "간호사":"lightgray", "약사":"blue", "치과의사":"purple"}[row["직업"]])).add_to(mark_cluster)    
     folium.Circle(
         radius = row["수"],
         location = [row["위도"], row["경도"]],
@@ -245,9 +240,7 @@ for _ in df_Nmw.index:
         color = {"의사":"crimson", "간호사":"lightgray", "약사":"blue", "치과의사":"purple"}[row["직업"]],
         fill = False        
     ).add_to(m)
-
 folium.LayerControl().add_to(m)
-    
 st_folium(m, width=1000)  
 
 
@@ -257,10 +250,57 @@ st.markdown("## 3. 보건 관련 지출비")
 st.markdown("### Data set")
 st.dataframe(df_service)
 
+
+
+
 ## part 4
 st.markdown("## 4. 의약품 판매 / 소비")
 st.markdown("### Data set")
 st.dataframe(df_medicion)
+## 연간 의약품 판매액/소비량
+st.markdown("#### 연간 의약품 판매액")
+with st.echo():
+    fig = plt.figure(figsize=(15, 4))
+    sns.pointplot(data=df_medicion, x='연도', y='의약품판매량', ci=None, estimator=np.sum).set_ylabel("의약품 판매량 (100만 $)", fontsize=11)
+    st.pyplot(fig)
+st.markdown("#### 연간 의약품 소비량")
+with st.echo():
+    fig = plt.figure(figsize=(15,4))
+    sns.pointplot(data=df_medicion, x='연도', y='의약품소비량', ci=None, estimator=np.sum)
+    st.pyplot(fig)
+## 국가별 의약품 판매량
+st.markdown("#### 국가별 의약품 판매량")
+with st.echo():
+    fig = plt.figure(figsize=(15, 15))
+    sns.catplot(data=df_medicion, x='의약품판매량', y='국가', kind='bar', ci=None, color="Orange").set_xticklabels(rotation=30)
+    st.pyplot(fig)
+## 국가별 의약품 소비량
+st.markdown("#### 국가별 의약품 소비량")
+with st.echo():
+    fig = plt.figure(15, 15)
+    sns.catplot(data=df_medicion, x='의약품소비량', y='국가', kind='bar', ci=None, color="Pink")
+    st.pyplot(fig)
+## 의약품별 연간 의약품 소비량
+st.markdown("#### 의약품별 연간 의약품 소비량")
+with st.echo():
+    fig = plt.figure(figsize=(15,10))
+    sns.pointplot(data=df_medicion, x='연도', y='의약품소비량', hue='의약품', ci=None, estimator=np.sum)
+    st.pyplot(fig)
+
+## 연간 국가별 의약품 판매량 df_sale
+st.markdown("#### 연간 국가별 의약품 판매량")
+with st.echo():
+    fig = plt.figure(figsize=(25,15))
+    sns.pointplot(data=df_medicion, x='연도', y='의약품판매량', hue='국가', ci=None)
+    st.pyplot(fig)
+## 연간 국가별 의약품 소비량 df_consume
+with st.echo():
+    fig = plt.figure(figsize=(25,15))
+    sns.pointplot(data=df_medicion, x='연도', y='의약품소비량', hue='국가', ci=None)
+    st.pyplot(fig)
+
+
+
 
 ## part 5
 st.markdown("## 5. 공공사회 복지 지출")
