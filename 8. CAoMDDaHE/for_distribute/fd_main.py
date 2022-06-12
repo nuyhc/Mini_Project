@@ -307,8 +307,24 @@ st.markdown("## 5. 공공사회 복지 지출")
 st.markdown("### Data set")
 st.markdown("#### 보건 서비스 지출")
 st.dataframe(df_service)
+## 복지 서비스 지출 증감
+st.markdown("#### 복지 서비스 지출 분석")
+with st.echo():
+    px_cont = df_service_common.groupby(by = ['연도','대륙'], as_index = False )['서비스비용(백만$)'].sum()
+    st.plotly_chart(px.bar(data_frame = px_cont, x= '연도', y = '서비스비용(백만$)',  color = '대륙', title = '국가 별 사회복지서비스 비용(백만$)'))
+    
+with st.echo():
+    st.plotly_chart(px.line(data_frame = df_welfare, x = '연도', y = '복지비용(10억$)', color = '국가', title = '연도 별 공공사회복지비용 - 국가별'))
+
 st.markdown("#### 공공사회 복지 지출")
 st.dataframe(df_welfare)
+## 공공 사회 복지 지출
+st.markdown("#### 공공사회 복지 지출")
+with st.echo():
+    fig = plt.figure(figsize=(14, 6))
+    sns.lineplot(data = df_welfare, x = '연도', y = '복지비용(10억$)', estimator = np.sum, ci = None)
+    st.pyplot(fig)
+
 
 
 ## part 6
