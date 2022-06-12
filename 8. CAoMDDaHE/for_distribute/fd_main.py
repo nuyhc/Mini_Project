@@ -10,9 +10,9 @@ from folium.plugins import MarkerCluster
 import json
 import streamlit as st
 from streamlit_folium import st_folium
-from googletrans import Translator
 import time
-
+import koreanize_matplotlib
+    
 ## Title
 st.title("질병 사망자 및 보건 환경 비교 분석")
 st.markdown("---")
@@ -35,50 +35,20 @@ with st.echo():
     import json
     import streamlit as st
     from streamlit_folium import st_folium
-    from googletrans import Translator
     import time
+    import koreanize_matplotlib
     
-## 한글폰트 설정
-from IPython.display import set_matplotlib_formats
-
-def get_font_family():
-    import platform
-    system_name = platform.system()
-
-    if system_name == "Darwin" :
-        font_family = "AppleGothic"
-    elif system_name == "Windows":
-        font_family = "Malgun Gothic"
-    else:
-        import matplotlib as mpl
-        mpl.font_manager._rebuild()
-        findfont = mpl.font_manager.fontManager.findfont
-        mpl.font_manager.findfont = findfont
-        mpl.backends.backend_agg.findfont = findfont
-        
-        font_family = "NanumBarunGothic"
-    return font_family
-
-get_font_family()
-
-plt.style.use("ggplot")
-
-font_family = get_font_family()
-plt.rc("font", family=font_family)
-plt.rc("axes", unicode_minus=False)
-
-set_matplotlib_formats("retina")
 
 ## Data Load
-df_death_rate = pd.read_csv("../data/pre_df/df_death_rate.csv")
-df_Nmw = pd.read_csv("../data/pre_df/df_Nmw.csv")
-df_service = pd.read_csv("../data/pre_df/df_service.csv")
-df_service_common = pd.read_csv("../data/pre_df/df_service_common.csv")
-df_medicion = pd.read_csv("../data/pre_df/df_medicion.csv")
-df_welfare = pd.read_csv("../data/pre_df/df_welfare.csv")
+df_death_rate = pd.read_csv("data/pre_df/df_death_rate.csv")
+df_Nmw = pd.read_csv("data/pre_df/df_Nmw.csv")
+df_service = pd.read_csv("data/pre_df/df_service.csv")
+df_service_common = pd.read_csv("data/pre_df/df_service_common.csv")
+df_medicion = pd.read_csv("data/pre_df/df_medicion.csv")
+df_welfare = pd.read_csv("data/pre_df/df_welfare.csv")
 ## json
-g_p = open("../data/countries.geo.edited.json", encoding="utf-8")
-gp = open("../data/countries.json", encoding="utf-8")
+g_p = open("data/countries.geo.edited.json", encoding="utf-8")
+gp = open("data/countries.json", encoding="utf-8")
 geo_poly = json.load(g_p)
 geo_point = pd.json_normalize(json.load(gp))
 g_p.close()
@@ -104,27 +74,6 @@ with st.echo():
         '에스토니아',  '그리스',  '슬로바키아',  '핀란드',  '벨기에',  '체코',  
         '슬로베니아',  '프랑스',  '스웨덴',  '노르웨이',  '뉴질랜드',  '라트비아',  
         '덴마크',  '오스트리아',  '포르투갈',  '아일랜드',  '아이슬란드']
-
-## 국가 영문명 추가
-st.markdown("## 영문 국가명 추가")
-st.markdown("데이터를 전처리하는 과정에서 영문 국가명을 추가해줬습니다.\n"
-            "Google Trans API를 이용했습니다\n")
-with st.echo():
-    translator = Translator()
-    
-    def kor2eng(list_of_country):
-        temp = []
-        for _ in list_of_country:
-            temp.append(translator.translate(_).text.lower())
-            time.sleep(0.5)
-        return temp
-
-    dict_kor2eng = {}
-    list_kor2eng = kor2eng(df_Nmw["국가"].unique())
-
-    for kor, eng in zip(df_Nmw["국가"].unique(), list_kor2eng):
-        dict_kor2eng[kor] = eng
-
 
 ## part 1
 st.markdown("## 1. 주요 사망 원인별 사망률")
@@ -281,8 +230,8 @@ with st.echo():
     sns.pointplot(data=df_medicion, x='연도', y='의약품소비량', hue='의약품', ci=None, estimator=np.sum)
     st.pyplot(fig)
 
-df_sale = pd.read_csv("../data/pre_df/df_sale.csv", encoding="cp949")
-df_consume = pd.read_csv("../data/pre_df/df_consume.csv", encoding="cp949")
+df_sale = pd.read_csv("data/pre_df/df_sale.csv", encoding="cp949")
+df_consume = pd.read_csv("data/pre_df/df_consume.csv", encoding="cp949")
 df_consume = df_consume.rename(columns={'시점':'연도'})
 df_consume = df_consume.rename(columns={'데이터':'의약품소비량'})
 df_sale = df_sale.rename(columns={'시점' : '연도'})
@@ -332,7 +281,7 @@ with st.echo():
 st.markdown("## 6. 최종")
 st.markdown("### Data set")
 st.text("앞서 사용한 모든 데이터를 합쳐 하나의 데이터로 생성")
-df_corr = pd.read_csv("../data/pre_df/df_corr.csv")
+df_corr = pd.read_csv("data/pre_df/df_corr.csv")
 df_corr_pre = df_corr[["국가", "연도", "평균 사망률", "평균 의료 인력 수", "1인당 보건지출", "평균 소비량", "평균 판매량", "평균 치료비", "평균 복지 비용(G$)"]]
 st.dataframe(df_corr_pre)
 ## 결측치 확인

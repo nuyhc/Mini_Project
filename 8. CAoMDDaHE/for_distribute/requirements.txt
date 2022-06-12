@@ -3,9 +3,10 @@ pandas
 seaborn
 plotly
 matplotlib
+koreanize_matplotlib
 cufflinks
 chart_studio
 folium
 streamlit
 streamlit_folium
-googletrans
+
