@@ -177,7 +177,7 @@ for _ in df_death_rate.index:
         fill = False        
     ).add_to(m)
 folium.LayerControl().add_to(m)     
-st_folium(m, width=1300)
+st_folium(m, width=800)
 
 ## part2
 st.markdown("## 2. 의료 종사자 수")
@@ -242,7 +242,7 @@ for _ in df_Nmw.index:
         fill = False        
     ).add_to(m)
 folium.LayerControl().add_to(m)
-st_folium(m, width=1300)  
+st_folium(m, width=800)  
 
 
 
@@ -274,18 +274,6 @@ st.markdown("#### 연간 의약품 소비량")
 with st.echo():
     fig = plt.figure(figsize=(15,4))
     sns.pointplot(data=df_medicion, x='연도', y='의약품소비량', ci=None, estimator=np.sum)
-    st.pyplot(fig)
-## 국가별 의약품 판매량
-st.markdown("#### 국가별 의약품 판매량")
-with st.echo():
-    fig = plt.figure(figsize=(13, 13))
-    sns.catplot(data=df_medicion, x='의약품판매량', y='국가', kind='bar', ci=None, color="Orange").set_xticklabels(rotation=30)
-    st.pyplot(fig)
-## 국가별 의약품 소비량
-st.markdown("#### 국가별 의약품 소비량")
-with st.echo():
-    fig = plt.figure(figsize=(13, 13))
-    sns.catplot(data=df_medicion, x='의약품소비량', y='국가', kind='bar', ci=None, color="Pink")
     st.pyplot(fig)
 ## 의약품별 연간 의약품 소비량
 st.markdown("#### 의약품별 연간 의약품 소비량")
@@ -345,19 +333,19 @@ with st.echo():
 st.markdown("## 6. 최종")
 st.markdown("### Data set")
 st.text("앞서 사용한 모든 데이터를 합쳐 하나의 데이터로 생성")
-df_corr = pd.read_csv("../data/pre_df/df_corr.csv", index=False)
+df_corr = pd.read_csv("../data/pre_df/df_corr.csv")
 df_corr_pre = df_corr[["국가", "연도", "평균 사망률", "평균 의료 인력 수", "1인당 보건지출", "평균 소비량", "평균 판매량", "평균 치료비", "평균 복지 비용(G$)"]]
 st.dataframe(df_corr_pre)
 ## 결측치 확인
 st.markdown("#### 결측치 확인")
 with st.echo():
-    st.pyplot(sns.heatmap(data=df_corr_pre.isnull()))
+    fig = plt.figure(figsize=(6, 4))
+    sns.heatmap(data=df_corr_pre.isnull())
+    st.pyplot(fig)
 
 st.code(df_corr_pre.isnull().mean()*100)
 st.write("9개의 데이터 셋을 공통 항목 (국가, 연도)로 가져오다보니 결측치가 있습니다.")
 st.write("특정 항목에서 약 23.4% 정도의 결측치 입니다.")
-## 기초 분석
-st.code(df_corr_pre.descirbe())
 
 ## 사망률과 의료 인프라
 st.markdown("#### 사망률과 의료 인프라")
@@ -479,7 +467,9 @@ df_kr_death_med = df_kr_death_med.merge(right = df_temp, on = 'key').drop(column
 df_kr_death_med.columns = ['연도','질병명_분류','사망률','의약품소비량']
 
 with st.echo():
-    st.pyplot(sns.heatmap(df_kr_death_med.corr(), cmap = 'summer_r', annot = True, fmt = '.2f'))
+    fig = plt.figure(figsize=(6, 4))
+    sns.heatmap(df_kr_death_med.corr(), cmap = 'summer_r', annot = True, fmt = '.2f')
+    st.pyplot(fig)
 
     
 st.markdown("##### 2. 국내 사망률 - 의료 종사자 수 간 관계 분석")
@@ -488,7 +478,9 @@ df_kr_death_workers = df_Nmw.loc[(df_Nmw['국가']=='한국') & (df_Nmw['직업'
 df_kr_death_workers.columns = ['직업', '연도', '종사자 수']
 df_kr_death_workers = df_kr_death_workers.merge(right = df_corr_kr.groupby('연도', as_index = False)['사망률'].mean(), on = '연도')
 with st.echo():
-    st.pyplot(sns.heatmap(df_kr_death_workers.corr(), cmap = 'summer_r', annot = True, fmt = '.2f'))
+    fig = plt.figure(figsize=(6, 4))
+    sns.heatmap(df_kr_death_workers.corr(), cmap = 'summer_r', annot = True, fmt = '.2f')
+    st.pyplot(fig)
     
 st.markdown("##### 3. 보건 관련 지출 간 관계 분석")
 st.markdown("![img](..\data\보건 관련 지출 간 관계 분석.png)")
@@ -499,5 +491,7 @@ target_list = ['치료 및 재활 치료', '장기 치료', '예방치료']
 df_kr_death_service_common = df_service_common.loc[(df_service_common['국가']=='한국')&(df_service_common['항목구분'].isin(target_list)), ['연도', '서비스비용(백만$)']].groupby('연도', as_index = False).sum().reset_index(drop = True)
 df_kr_death_service_common = df_kr_death_service_common.merge(right = df_temp_corr, on = '연도')
 with st.echo():
-    st.pyplot(sns.heatmap(df_kr_death_service_common.corr(), cmap = 'summer_r', annot = True))
+    fig = plt.figure(figsize=(6, 4))
+    sns.heatmap(df_kr_death_service_common.corr(), cmap = 'summer_r', annot = True)
+    st.pyplot(fig)
 
