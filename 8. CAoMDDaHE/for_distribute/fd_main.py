@@ -8,38 +8,38 @@ import chart_studio
 import folium
 from folium.plugins import MarkerCluster
 import json
-import Stramlit as st
+import streamlit as st
 
 ## Title
-st.title("주요 질병 사망자 및 보건 환경 비교 분석")
+st.title("주요 질병 사망자 및 보건 환경")
+st.title("비교 분석")
 
 ## Header
-st.header("멋쟁이 사자처럼 AI School 6기 MID Project 2팀")
+st.header("멋쟁이 사자처럼 AI School 6기")
+st.header("MID Project 2팀")
 st.text("팀원: 김재석, 김채현, 김태훈, 박이슬, 손유선")
 
 ## 사용 라이브러리
-st.markdown("## 사용 라이브러리\n"
-            "```python"
-            "import numpy as np"
-            "import pandas as pd"
-            "import seaborn as sns"
-            "import plotly.express as px"
-            "import matplotlib.pyplot as plt"
-            "import cufflinks as cf"
-            "import chart_studio"
-            "import folium"
-            "from folium.plugins import MarkerCluster"
-            "import json"
-            "import Stramlit as st"
-            )
+with st.echo():
+    import numpy as np
+    import pandas as pd
+    import seaborn as sns
+    import plotly.express as px
+    import matplotlib.pyplot as plt
+    import cufflinks as cf
+    import chart_studio
+    import folium
+    from folium.plugins import MarkerCluster
+    import json
+    import streamlit as st
 
 ## Data Load
-df_death_rate = pd.read_csv("data/pre_df/df_death_rate.csv")
-df_Nmw = pd.read_csv("data/pre_df/df_Nmw.csv")
-df_service = pd.read_csv("data/pre_df/df_service.csv")
-df_service_common = pd.read_csv("data/pre_df/df_service_common.csv")
-df_medicion = pd.read_csv("data/pre_df/df_medicion.csv")
-df_welfare = pd.read_csv("data/pre_df/df_welfare.csv")
+df_death_rate = pd.read_csv("../data/pre_df/df_death_rate.csv")
+df_Nmw = pd.read_csv("../data/pre_df/df_Nmw.csv")
+df_service = pd.read_csv("../data/pre_df/df_service.csv")
+df_service_common = pd.read_csv("../data/pre_df/df_service_common.csv")
+df_medicion = pd.read_csv("../data/pre_df/df_medicion.csv")
+df_welfare = pd.read_csv("../data/pre_df/df_welfare.csv")
 
 ## part 1
 st.markdown("## 1. 주요 사망 원인별 사망률")
@@ -66,7 +66,7 @@ st.markdown("## 5. 공공사회 복지 지출")
 st.markdown("### Data set")
 st.markdown("#### 보건 서비스 지출")
 st.dataframe(df_service)
-st.mrkdown("#### 공공사회 복지 지출")
+st.markdown("#### 공공사회 복지 지출")
 st.dataframe(df_welfare)
 
 
@@ -74,5 +74,5 @@ st.dataframe(df_welfare)
 st.markdown("## 6. 최종")
 st.markdown("### Data set")
 st.text("앞서 사용한 모든 데이터를 합쳐 하나의 데이터로 생성")
-df_corr = pd.read_csv("data/pre_df/df_corr.csv")
+df_corr = pd.read_csv("../data/pre_df/df_corr.csv")
 st.dataframe(df_corr)
