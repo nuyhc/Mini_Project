@@ -10,6 +10,8 @@ from folium.plugins import MarkerCluster
 import json
 import streamlit as st
 from streamlit_folium import st_folium
+from googletrans import Translator
+import time
 
 ## Title
 st.title("질병 사망자 및 보건 환경 비교 분석")
@@ -32,6 +34,9 @@ with st.echo():
     from folium.plugins import MarkerCluster
     import json
     import streamlit as st
+    from streamlit_folium import st_folium
+    from googletrans import Translator
+    import time
     
 ## 한글폰트 설정
 from IPython.display import set_matplotlib_formats
@@ -72,8 +77,8 @@ df_service_common = pd.read_csv("../data/pre_df/df_service_common.csv")
 df_medicion = pd.read_csv("../data/pre_df/df_medicion.csv")
 df_welfare = pd.read_csv("../data/pre_df/df_welfare.csv")
 ## json
-g_p = open("../data/countries.geo.edited.json")
-gp = open("../data/countries.json")
+g_p = open("../data/countries.geo.edited.json", encoding="utf-8")
+gp = open("../data/countries.json", encoding="utf-8")
 geo_poly = json.load(g_p)
 geo_point = pd.json_normalize(json.load(gp))
 g_p.close()
@@ -105,8 +110,6 @@ st.markdown("## 영문 국가명 추가")
 st.markdown("데이터를 전처리하는 과정에서 영문 국가명을 추가해줬습니다.\n"
             "Google Trans API를 이용했습니다\n")
 with st.echo():
-    from googletrans import Translator
-    import time
     translator = Translator()
     
     def kor2eng(list_of_country):
@@ -121,6 +124,7 @@ with st.echo():
 
     for kor, eng in zip(df_Nmw["국가"].unique(), list_kor2eng):
         dict_kor2eng[kor] = eng
+
 
 ## part 1
 st.markdown("## 1. 주요 사망 원인별 사망률")
@@ -143,48 +147,110 @@ st.markdown("#### 국가별 질병 사망 비율")
 with st.echo():
     st.plotly_chart(px.bar(data_frame=df_death_rate, x="연도", y="사망률", color="질병명", facet_col="국가", facet_col_wrap=5, title="국가별 질병 사망 비율", width=1600, height=800))
 ## 지역 시각화
-with st.ehco():
-    icon_color = ["red", "blue", "green", "purple", "orange", "lightred", "beige", "darkblue", "darkgreen", "cadetblue", "darkpurple", "white", "pink", "lightblue", "lightgreen", "gray", "black", "lightgray"]
-    innter_choropleth = geo_poly
+st.markdown("#### 종합 지역 시각화")
+icon_color = ["red", "blue", "green", "purple", "orange", "lightred", "beige", "darkblue", "darkgreen", "cadetblue", "darkpurple", "white", "pink", "lightblue", "lightgreen", "gray", "black", "lightgray"]
+innter_choropleth = geo_poly
     
-    m = folium.Map(zoom_star=2, tiles="CartoDB dark_matter", dexet_retina=True)
+m = folium.Map(zoom_star=2, tiles="CartoDB dark_matter", dexet_retina=True)
 
-    folium.Choropleth(
-        geo_data=inter_choropleth,
-        name="choropleth",
-        key_on="feature.properties.name",
-        fill_color="yellow",
-        fill_opacity=0.15,
-        line_opacity=0.7,
+folium.Choropleth(
+    geo_data=innter_choropleth,
+    name="choropleth",
+    key_on="feature.properties.name",
+    fill_color="yellow",
+    fill_opacity=0.15,
+    line_opacity=0.7,
+).add_to(m)
+
+mark_cluster = MarkerCluster().add_to(m)
+
+for _ in df_death_rate.index:
+    row = df_death_rate.loc[_]
+    
+    folium.Marker([row["위도"], row["경도"]], icon=folium.Icon(icon="glyphicon glyphicon-certificate", color={k : v for k, v in zip(df_death_rate["질병명"].unique(), icon_color)}[row["질병명"]])).add_to(mark_cluster)
+        
+    folium.Circle(
+        radius = row["사망률"],
+        location = [row["위도"], row["경도"]],
+        tooltip = str(row["연도"]) + "년도 " + row["국가"] + " " + row["질병명"] + "로 인한 사망률 " + str(row["사망률"]),
+        color = {k : v for k, v in zip(df_death_rate["질병명"].unique(), icon_color)}[row["질병명"]],
+        fill = False        
     ).add_to(m)
 
-    mark_cluster = MarkerCluster().add_to(m)
-
-    for _ in df.index:
-        row = df.loc[_]
-        
-        folium.Marker([row["위도"], row["경도"]], icon=folium.Icon(icon="glyphicon glyphicon-certificate", color={k : v for k, v in zip(df_death_rate["질병명"].unique(), icon_color)}[row["질병명"]])).add_to(mark_cluster)
-        
-        folium.Circle(
-            radius = row["사망률"],
-            location = [row["위도"], row["경도"]],
-            tooltip = str(row["연도"]) + "년도 " + row["국가"] + " " + row["질병명"] + "로 인한 사망률 " + str(row["사망률"]),
-            color = {k : v for k, v in zip(df_death_rate["질병명"].unique(), icon_color)}[row["질병명"]],
-            fill = False        
-        ).add_to(m)
-
-    folium.LayerControl().add_to(m)   
+folium.LayerControl().add_to(m)   
     
-    st_folium(m)
-
-
-
-
+st_folium(m, width=1000)
 
 ## part2
 st.markdown("## 2. 의료 종사자 수")
 st.markdown("### Data set")
 st.dataframe(df_Nmw)
+## 연도별 의료 인력
+st.markdown("#### 연도별 의료 인력 수")
+with st.echo():
+    fig = plt.figure(figsize=(14, 6))
+    sns.pointplot(data=df_Nmw, x="연도", y="수", hue="직업", estimator=np.mean, ci=None).set_title("연도별 의료 인력 수")
+    st.pyplot(fig)
+
+with st.echo():
+    st.plotly_chart(px.line(data_frame=df_Nmw, x="연도", y="수", facet_col="직업", color="국가", title="직업군별 추이"))
+
+## 국가별 의료 인력
+st.markdown("#### 국가별 의료 인력")
+with st.echo():
+    fig = plt.figure(figsize=(18, 12))
+    sns.pointplot(data=df_Nmw, x="연도", y="수", hue="국가", ci=None).set_title("국가별 - 연도별 의료 인력 수 (상세)")
+    st.pyplot(fig)
+    
+temp = []
+group_yc = df_Nmw.groupby("연도", as_index=False)["국가"].value_counts()
+for _ in range(len(group_yc["연도"].unique())):
+    temp.append(set(group_yc[group_yc["연도"]==group_yc["연도"].unique()[_]]["국가"].values))
+always = set(temp[0])
+for _ in range(1, len(temp)):
+    always = always & temp[_]
+
+df_Nmw_always = df_Nmw[df_Nmw["국가"].isin(always)]
+df_Nmw_always = df_Nmw_always.reset_index(drop=True).copy()
+
+## 직업군별 추이
+st.markdown("#### 직업군별 추이")
+with st.echo():
+    st.plotly_chart(px.line(data_frame=df_Nmw_always, x="연도", y="수", facet_col="직업", color="국가", title="직업군별 추이"))
+
+## 지역 시각화
+st.markdown("#### 종합 지역 시각화")
+m = folium.Map(zoom_star=2, tiles="CartoDB dark_matter")
+
+folium.Choropleth(
+    geo_data=innter_choropleth,
+    name="choropleth",
+    key_on="feature.properties.name",
+    fill_color="yellow",
+    fill_opacity=0.15,
+    line_opacity=0.7,
+).add_to(m)
+
+mark_cluster = MarkerCluster().add_to(m)
+
+for _ in df_Nmw.index:
+    row = df_Nmw.loc[_]
+        
+    folium.Marker([row["위도"], row["경도"]], icon=folium.Icon(icon="glyphicon glyphicon-plus",color={"의사":"red", "간호사":"lightgray", "약사":"blue", "치과의사":"purple"}[row["직업"]])).add_to(mark_cluster)
+        
+    folium.Circle(
+        radius = row["수"],
+        location = [row["위도"], row["경도"]],
+        tooltip = str(row["연도"]) + "년도 " + row["국가"] + " " + {"의사":"의사", "간호사":"간호사", "약사":"약사", "치과의사":"치과의사"}[row["직업"]] + " : " + str(row["수"]),
+        color = {"의사":"crimson", "간호사":"lightgray", "약사":"blue", "치과의사":"purple"}[row["직업"]],
+        fill = False        
+    ).add_to(m)
+
+folium.LayerControl().add_to(m)
+    
+st_folium(m, width=1000)  
+
+
 
 ## part 3
 st.markdown("## 3. 보건 관련 지출비")
