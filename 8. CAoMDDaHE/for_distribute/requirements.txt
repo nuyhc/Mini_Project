@@ -1,0 +1,11 @@
+numpy
+pandas
+seaborn
+plotly
+matplotlib
+cufflinks
+chart_studio
+folium
+streamlit
+streamlit_folium
+googletrans
