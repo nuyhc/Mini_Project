@@ -51,10 +51,12 @@ Visualization_of Climate Technology Information_for Carbon Neutrality
 Comparative Analysis of Major Disease Deaths and Health Environment  
 [KOSIS 데이터](https://kosis.kr/statHtml/statHtml.do?orgId=101&tblId=DT_2KAAC13&conn_path=I2)와 [geojson](https://github.com/dr5hn/countries-states-cities-database)을 이용해 EDA와 시각화를 진행한 프로젝트  
 멋쟁이 사자처럼 AI School 6기 Mid Project  
+`streamlit`을 이용해 배포도 진행해 봄
+
 1. 주요 사망 원인별 사망률 - 김태훈, 김채현
 2. 의료종사자 수 - 김채현
 3. 보건 관련 서비스 지출비 - 김재석
 4. 의약품 판매 소비 - 손유선
 5. 공공사회 복지 지출 - 박이슬
-
+6. 종합 및 결론 - 김채현, 박이슬
 ---
