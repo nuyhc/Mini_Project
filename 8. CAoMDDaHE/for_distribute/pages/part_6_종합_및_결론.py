@@ -12,276 +12,28 @@ import streamlit as st
 from streamlit_folium import st_folium
 import time
 import koreanize_matplotlib
-    
-## Title
-st.title("질병 사망자 및 보건 환경 비교 분석")
-st.markdown("---")
-## Header
-st.header("MID Project 2팀")
-st.text("팀원: 김재석, 김채현, 김태훈, 박이슬, 손유선")
-st.markdown("---")
+from PIL import Image
 
-st.markdown("## 사용 라이브러리")
-with st.echo():
-    import numpy as np
-    import pandas as pd
-    import seaborn as sns
-    import plotly.express as px
-    import matplotlib.pyplot as plt
-    import cufflinks as cf
-    import chart_studio
-    import folium
-    from folium.plugins import MarkerCluster
-    import json
-    import streamlit as st
-    from streamlit_folium import st_folium
-    import time
-    import koreanize_matplotlib
-    
+st.set_page_config(layout='wide')
 
-## Data Load
-df_death_rate = pd.read_csv("data/pre_df/df_death_rate.csv")
-df_Nmw = pd.read_csv("data/pre_df/df_Nmw.csv")
-df_service = pd.read_csv("data/pre_df/df_service.csv")
-df_service_common = pd.read_csv("data/pre_df/df_service_common.csv")
-df_medicion = pd.read_csv("data/pre_df/df_medicion.csv")
-df_welfare = pd.read_csv("data/pre_df/df_welfare.csv")
-## json
-g_p = open("data/countries.geo.edited.json", encoding="utf-8")
-gp = open("data/countries.json", encoding="utf-8")
-geo_poly = json.load(g_p)
-geo_point = pd.json_normalize(json.load(gp))
-g_p.close()
-gp.close()
-
-## 데이터 분석 범위 설정
-st.markdown("## 데이터 분석 범위 설정")
-st.markdown("사망률 및 보건 인프라 분석에 사용할 9개 데이터 셋을 선정하며,\n"
-            "두 가지 문제점을 발견\n"
-            "- 데이터 셋마다 수록 기간이 상이함\n"
-            "- Raw Data 출처에 따라, 데이터가 제공하는 나라가 다름\n"
-            "   - 일부는 OECD 국가를 대상으로 함\n"
-            "   - WHO 데이터를 집계한 경우, 훨씬 광범위한 나라를 다루고 있음\n")
-st.markdown("본 프로젝트는 \"질병에 따른 사망률\"과\"다양한 보건 인프라\"간의 관계를\n"
-            "분석해보기 위함으로, 공통으로 제공하는 기간과 국가를 대상으로 분석 범위를 설정\n")
-
-with st.echo():
-    # 교집합 이용
-    # country_intersecion = set(df_1) & set(df_2) & set(df_3) & set(df_4) ..
-    # 최종 리스트 선정
-    country_intersection = ['룩셈부르크',  '네덜란드',  '영국',  '이탈리아',  
+country_intersection = ['룩셈부르크',  '네덜란드',  '영국',  '이탈리아',  
         '캐나다',  '오스트레일리아',  '한국',  '일본',  '스페인',  '헝가리',  '독일',  
         '에스토니아',  '그리스',  '슬로바키아',  '핀란드',  '벨기에',  '체코',  
         '슬로베니아',  '프랑스',  '스웨덴',  '노르웨이',  '뉴질랜드',  '라트비아',  
         '덴마크',  '오스트리아',  '포르투갈',  '아일랜드',  '아이슬란드']
-
-## part 1
-st.markdown("## 1. 주요 사망 원인별 사망률")
-st.markdown("### Data set")
-st.dataframe(df_death_rate) # st.table도 사용 가능 -> 일부만 표시시
-## 연도별 평균 사망률
-st.markdown("#### 연도별 평균 사망률")
-with st.echo():
-    fig = plt.figure(figsize=(14, 6))
-    sns.pointplot(data=df_death_rate, x="연도", y="사망률", hue="국가", estimator=np.mean, ci=None).set_title("연도별 사망률 (연간 평균 사망률)")
-    st.pyplot(fig)
-## 질병에 따른 사망률
-st.markdown("#### 질병에 따른 사망률")
-with st.echo():
-    fig = plt.figure(figsize=(14, 6))
-    sns.pointplot(data=df_death_rate, x="연도", y="사망률", hue="질병명", estimator=np.sum, ci=None).set_title("질병에 따른 사망률")
-    st.pyplot(fig)
-## 국가별 질병 사망 비율
-st.markdown("#### 국가별 질병 사망 비율")
-with st.echo():
-    st.plotly_chart(px.bar(data_frame=df_death_rate, x="연도", y="사망률", color="질병명", facet_col="국가", facet_col_wrap=5, title="국가별 질병 사망 비율", width=1600, height=800))
-## 지역 시각화
-st.markdown("#### 종합 지역 시각화")
-
-icon_color = ["red", "blue", "green", "purple", "orange", "lightred", "beige", "darkblue", "darkgreen", "cadetblue", "darkpurple", "white", "pink", "lightblue", "lightgreen", "gray", "black", "lightgray"]
-innter_choropleth = geo_poly
-    
-m = folium.Map(zoom_star=2, tiles="CartoDB dark_matter", dexet_retina=True)
-
-folium.Choropleth(
-    geo_data=innter_choropleth,
-    name="choropleth",
-    key_on="feature.properties.name",
-    fill_color="yellow",
-    fill_opacity=0.15,
-    line_opacity=0.7,
-).add_to(m)
-
-mark_cluster = MarkerCluster().add_to(m)
-
-for _ in df_death_rate.index:
-    row = df_death_rate.loc[_]  
-    folium.Marker([row["위도"], row["경도"]], icon=folium.Icon(icon="glyphicon glyphicon-certificate", color={k : v for k, v in zip(df_death_rate["질병명"].unique(), icon_color)}[row["질병명"]])).add_to(mark_cluster)       
-    folium.Circle(
-        radius = row["사망률"],
-        location = [row["위도"], row["경도"]],
-        tooltip = str(row["연도"]) + "년도 " + row["국가"] + " " + row["질병명"] + "로 인한 사망률 " + str(row["사망률"]),
-        color = {k : v for k, v in zip(df_death_rate["질병명"].unique(), icon_color)}[row["질병명"]],
-        fill = False        
-    ).add_to(m)
-folium.LayerControl().add_to(m)     
-st_folium(m, width=800)
-
-## part2
-st.markdown("## 2. 의료 종사자 수")
-st.markdown("### Data set")
-st.dataframe(df_Nmw)
-## 연도별 의료 인력
-st.markdown("#### 연도별 의료 인력 수")
-with st.echo():
-    fig = plt.figure(figsize=(14, 6))
-    sns.pointplot(data=df_Nmw, x="연도", y="수", hue="직업", estimator=np.mean, ci=None).set_title("연도별 의료 인력 수")
-    st.pyplot(fig)
-
-with st.echo():
-    st.plotly_chart(px.line(data_frame=df_Nmw, x="연도", y="수", facet_col="직업", color="국가", title="직업군별 추이"))
-
-## 국가별 의료 인력
-st.markdown("#### 국가별 의료 인력")
-with st.echo():
-    fig = plt.figure(figsize=(18, 12))
-    sns.pointplot(data=df_Nmw, x="연도", y="수", hue="국가", ci=None).set_title("국가별 - 연도별 의료 인력 수 (상세)")
-    st.pyplot(fig)
-    
-temp = []
-group_yc = df_Nmw.groupby("연도", as_index=False)["국가"].value_counts()
-for _ in range(len(group_yc["연도"].unique())):
-    temp.append(set(group_yc[group_yc["연도"]==group_yc["연도"].unique()[_]]["국가"].values))
-always = set(temp[0])
-for _ in range(1, len(temp)):
-    always = always & temp[_]
-
-df_Nmw_always = df_Nmw[df_Nmw["국가"].isin(always)]
-df_Nmw_always = df_Nmw_always.reset_index(drop=True).copy()
-
-## 직업군별 추이
-st.markdown("#### 직업군별 추이")
-with st.echo():
-    st.plotly_chart(px.line(data_frame=df_Nmw_always, x="연도", y="수", facet_col="직업", color="국가", title="직업군별 추이"))
-
-## 지역 시각화
-st.markdown("#### 종합 지역 시각화")
-m = folium.Map(zoom_star=2, tiles="CartoDB dark_matter")
-
-folium.Choropleth(
-    geo_data=innter_choropleth,
-    name="choropleth",
-    key_on="feature.properties.name",
-    fill_color="yellow",
-    fill_opacity=0.15,
-    line_opacity=0.7,
-).add_to(m)
-
-mark_cluster = MarkerCluster().add_to(m)
-
-for _ in df_Nmw.index:
-    row = df_Nmw.loc[_]    
-    folium.Marker([row["위도"], row["경도"]], icon=folium.Icon(icon="glyphicon glyphicon-plus",color={"의사":"red", "간호사":"lightgray", "약사":"blue", "치과의사":"purple"}[row["직업"]])).add_to(mark_cluster)    
-    folium.Circle(
-        radius = row["수"],
-        location = [row["위도"], row["경도"]],
-        tooltip = str(row["연도"]) + "년도 " + row["국가"] + " " + {"의사":"의사", "간호사":"간호사", "약사":"약사", "치과의사":"치과의사"}[row["직업"]] + " : " + str(row["수"]),
-        color = {"의사":"crimson", "간호사":"lightgray", "약사":"blue", "치과의사":"purple"}[row["직업"]],
-        fill = False        
-    ).add_to(m)
-folium.LayerControl().add_to(m)
-st_folium(m, width=800)  
-
-
-
-## part 3
-st.markdown("## 3. 보건 관련 지출비")
-st.markdown("### Data set")
-st.dataframe(df_service)
-## 세계 1인당 보건지출(US$) 연도별
-st.markdown("#### 세계 1인당 보건 지출 (US$)")
-with st.echo():
-    df_service = df_service[df_service["항목"]=="1인당 보건지출(US$)"].reset_index(drop=True)
-    w_pivot = pd.pivot_table(data=df_service,index='연도', columns='국가영문', values="데이터값")
-    st.plotly_chart(px.line(w_pivot))
-
-
-
-
-## part 4
-st.markdown("## 4. 의약품 판매 / 소비")
-st.markdown("### Data set")
-st.dataframe(df_medicion)
-## 연간 의약품 판매액/소비량
-st.markdown("#### 연간 의약품 판매액")
-with st.echo():
-    fig = plt.figure(figsize=(15, 4))
-    sns.pointplot(data=df_medicion, x='연도', y='의약품판매량', ci=None, estimator=np.sum).set_ylabel("의약품 판매량 (100만 $)", fontsize=11)
-    st.pyplot(fig)
-st.markdown("#### 연간 의약품 소비량")
-with st.echo():
-    fig = plt.figure(figsize=(15,4))
-    sns.pointplot(data=df_medicion, x='연도', y='의약품소비량', ci=None, estimator=np.sum)
-    st.pyplot(fig)
-## 의약품별 연간 의약품 소비량
-st.markdown("#### 의약품별 연간 의약품 소비량")
-with st.echo():
-    fig = plt.figure(figsize=(15,10))
-    sns.pointplot(data=df_medicion, x='연도', y='의약품소비량', hue='의약품', ci=None, estimator=np.sum)
-    st.pyplot(fig)
-
-df_sale = pd.read_csv("data/pre_df/df_sale.csv", encoding="cp949")
-df_consume = pd.read_csv("data/pre_df/df_consume.csv", encoding="cp949")
-df_consume = df_consume.rename(columns={'시점':'연도'})
-df_consume = df_consume.rename(columns={'데이터':'의약품소비량'})
-df_sale = df_sale.rename(columns={'시점' : '연도'})
-df_sale = df_sale.rename(columns={'데이터' : '의약품판매량'})
-
-## 연간 국가별 의약품 판매량 df_sale
-st.markdown("#### 연간 국가별 의약품 판매량")
-with st.echo():
-    fig = plt.figure(figsize=(25,15))
-    sns.pointplot(data=df_sale, x='연도', y='의약품판매량', hue='국가', ci=None)
-    st.pyplot(fig)
-## 연간 국가별 의약품 소비량 df_consume
-with st.echo():
-    fig = plt.figure(figsize=(25,15))
-    sns.pointplot(data=df_medicion, x='연도', y='의약품소비량', hue='국가', ci=None)
-    st.pyplot(fig)
-
-
-
-
-## part 5
-st.markdown("## 5. 공공사회 복지 지출")
-st.markdown("### Data set")
-st.markdown("#### 보건 서비스 지출")
-st.dataframe(df_service)
-## 복지 서비스 지출 증감
-st.markdown("#### 복지 서비스 지출 분석")
-with st.echo():
-    px_cont = df_service_common.groupby(by = ['연도','대륙'], as_index = False )['서비스비용(백만$)'].sum()
-    st.plotly_chart(px.bar(data_frame = px_cont, x= '연도', y = '서비스비용(백만$)',  color = '대륙', title = '국가 별 사회복지서비스 비용(백만$)'))
-    
-with st.echo():
-    st.plotly_chart(px.line(data_frame = df_welfare, x = '연도', y = '복지비용(10억$)', color = '국가', title = '연도 별 공공사회복지비용 - 국가별'))
-
-st.markdown("#### 공공사회 복지 지출")
-st.dataframe(df_welfare)
-## 공공 사회 복지 지출
-st.markdown("#### 공공사회 복지 지출")
-with st.echo():
-    fig = plt.figure(figsize=(14, 6))
-    sns.lineplot(data = df_welfare, x = '연도', y = '복지비용(10억$)', estimator = np.sum, ci = None)
-    st.pyplot(fig)
-
 
 
 ## part 6
 st.markdown("## 6. 최종")
 st.markdown("### Data set")
 st.text("앞서 사용한 모든 데이터를 합쳐 하나의 데이터로 생성")
+df_death_rate = pd.read_csv("data/pre_df/df_death_rate.csv")
 df_corr = pd.read_csv("data/pre_df/df_corr.csv")
+df_Nmw = pd.read_csv("data/pre_df/df_Nmw.csv")
+df_service = pd.read_csv("data/pre_df/df_service.csv")
+df_service_common = pd.read_csv("data/pre_df/df_service_common.csv")
+df_medicion = pd.read_csv("data/pre_df/df_medicion.csv")
+df_welfare = pd.read_csv("data/pre_df/df_welfare.csv")
 df_corr_pre = df_corr[["국가", "연도", "평균 사망률", "평균 의료 인력 수", "1인당 보건지출", "평균 소비량", "평균 판매량", "평균 치료비", "평균 복지 비용(G$)"]]
 st.dataframe(df_corr_pre)
 ## 결측치 확인
@@ -431,7 +183,8 @@ with st.echo():
     st.pyplot(fig)
     
 st.markdown("##### 3. 보건 관련 지출 간 관계 분석")
-st.markdown("![img](..\data\보건 관련 지출 간 관계 분석.png)")
+imgr = Image.open('data/img.png')
+st.image(imgr)
 
 st.markdown("##### 4. 국내 사망률 - 보건 서비스 지출 간 관계 분석")
 df_temp_corr = df_corr_kr.groupby('연도', as_index = False)[['사망률']].mean()

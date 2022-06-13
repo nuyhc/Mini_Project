@@ -9,4 +9,4 @@ chart_studio
 folium
 streamlit
 streamlit_folium
-
+Image
