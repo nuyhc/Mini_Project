@@ -59,4 +59,7 @@ Comparative Analysis of Major Disease Deaths and Health Environment
 4. 의약품 판매 소비 - 손유선
 5. 공공사회 복지 지출 - 박이슬
 6. 종합 및 결론 - 김채현, 박이슬
+
+[Streamlit 대시보드](https://share.streamlit.io/nuyhc/caomddahe/main/intro_main.py)
+
 ---
